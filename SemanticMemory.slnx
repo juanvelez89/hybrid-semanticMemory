@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SemanticMemory.Api/SemanticMemory.Api.csproj" />
+    <Project Path="src/SemanticMemory.Application/SemanticMemory.Application.csproj" />
+    <Project Path="src/SemanticMemory.Domain/SemanticMemory.Domain.csproj" />
+    <Project Path="src/SemanticMemory.Infrastructure/SemanticMemory.Infrastructure.csproj" />
+    <Project Path="src/SemanticMemory.Worker/SemanticMemory.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SemanticMemory.IntegrationTests/SemanticMemory.IntegrationTests.csproj" />
+    <Project Path="tests/SemanticMemory.UnitTests/SemanticMemory.UnitTests.csproj" />
+  </Folder>
+</Solution>

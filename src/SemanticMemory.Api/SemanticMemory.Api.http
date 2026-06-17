@@ -1,0 +1,6 @@
+@SemanticMemory.Api_HostAddress = http://localhost:0
+
+GET {{SemanticMemory.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
