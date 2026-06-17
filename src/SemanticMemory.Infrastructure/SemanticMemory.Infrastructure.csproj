@@ -5,6 +5,10 @@
     <ProjectReference Include="..\SemanticMemory.Domain\SemanticMemory.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Neo4j.Driver" Version="5.28.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

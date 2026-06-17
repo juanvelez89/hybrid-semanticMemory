@@ -13,7 +13,7 @@ Este repositorio implementa el MVP hibrido descrito en [hybrid-semanticMemory.md
 - Olvido logico por `MemoryStatus`.
 - Aislamiento obligatorio por `TenantId + UserId`.
 
-La version actual corre lista para desarrollo con adaptadores fake/in-memory. Esto permite probar la API sin API keys, Postgres ni Neo4j. El `docker-compose.yml` y la migracion SQL inicial quedan incluidos para conectar persistencia real en el siguiente paso.
+La version actual corre lista para desarrollo con adaptadores fake/in-memory para embeddings, extraccion, chunks y evidencia. El grafo semantico puede usar Neo4j Aura si configuras las variables `NEO4J_*`; si no existen, usa el store en memoria.
 
 ## Requisitos
 
@@ -90,7 +90,39 @@ Servicios:
 - Neo4j Browser: `http://localhost:7474`
 - Neo4j Bolt: `bolt://localhost:7687`
 
-La API actual usa stores en memoria por defecto. Para persistencia real, implementar los puertos de `SemanticMemory.Application.Abstractions` en Infrastructure usando PostgreSQL/pgvector y Neo4j.
+La API usa stores en memoria por defecto. Si configuras `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` y `NEO4J_DATABASE`, el puerto `ISemanticGraphStore` se conecta a Neo4j y crea automaticamente constraints/indices al arrancar.
+
+## Configurar Neo4j Aura
+
+Define estas variables de entorno antes de levantar la API:
+
+```bash
+export NEO4J_URI="neo4j+s://your-instance.databases.neo4j.io"
+export NEO4J_USERNAME="your-instance-id"
+export NEO4J_PASSWORD="your-password"
+export NEO4J_DATABASE="your-database"
+```
+
+Luego ejecuta:
+
+```bash
+dotnet run --project src/SemanticMemory.Api --launch-profile http
+```
+
+Al iniciar, la API verifica conectividad y crea este schema en Neo4j:
+
+```text
+neo4j/schema.cypher
+```
+
+No guardes credenciales reales en `.env.example`, `appsettings.json` ni commits. Usa variables de entorno locales, secretos del sistema o el gestor de despliegue.
+
+Para validar la conexion y crear el schema sin levantar la API:
+
+```bash
+chmod +x scripts/verify-neo4j.sh
+scripts/verify-neo4j.sh
+```
 
 ## Endpoints principales
 
@@ -164,6 +196,8 @@ Implementado:
 - Entity/relation extraction fake por reglas.
 - Vector store en memoria.
 - Semantic graph store en memoria.
+- Semantic graph store real para Neo4j Aura usando `Neo4j.Driver`.
+- Inicializacion automatica de constraints/indices de Neo4j.
 - Evidence store en memoria.
 - Tests de flujo y composicion.
 - Docker Compose para servicios externos.
@@ -172,7 +206,6 @@ Implementado:
 Pendiente para persistencia real:
 
 - Implementar `IVectorMemoryStore` con PostgreSQL + pgvector.
-- Implementar `ISemanticGraphStore` con Neo4j.Driver.
 - Implementar `IEvidenceStore` y `IMemoryEventStore` con PostgreSQL.
 - Agregar migraciones EF Core o pipeline SQL formal.
 - Agregar proveedor real de embeddings/LLM.

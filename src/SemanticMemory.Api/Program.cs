@@ -19,6 +19,13 @@ builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
+var neo4jSchemaInitializer = app.Services.GetService<Neo4jSchemaInitializer>();
+
+if (neo4jSchemaInitializer is not null)
+{
+    await neo4jSchemaInitializer.InitializeAsync(app.Lifetime.ApplicationStopping);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
