@@ -92,6 +92,39 @@ Servicios:
 
 La API usa stores en memoria por defecto. Si configuras `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` y `NEO4J_DATABASE`, el puerto `ISemanticGraphStore` se conecta a Neo4j y crea automaticamente constraints/indices al arrancar.
 
+Si configuras `POSTGRES_CONNECTION_STRING`, la API usa PostgreSQL/pgvector para `MemoryChunk`, embeddings, `Evidence` y `MemoryEvent`. Si no existe, usa stores en memoria.
+
+## Configurar Supabase PostgreSQL
+
+Define la conexion como variable de entorno. Para Supabase puedes usar la URL `postgresql://...` directamente:
+
+```bash
+export POSTGRES_CONNECTION_STRING="postgresql://postgres:your-password@db.your-project.supabase.co:5432/postgres"
+```
+
+La app normaliza esa URL para Npgsql y fuerza SSL requerido.
+
+Si ves un error como `No route to host` hacia una direccion IPv6, usa el connection string del pooler de Supabase en lugar del host directo. En Supabase esta en:
+
+```text
+Project Settings -> Database -> Connection pooling
+```
+
+Normalmente usa un host tipo `*.pooler.supabase.com` y puerto `6543` para transaction/session pooler. Ese formato tambien funciona en `POSTGRES_CONNECTION_STRING`.
+
+Luego valida schema y conectividad:
+
+```bash
+chmod +x scripts/verify-postgres.sh
+scripts/verify-postgres.sh
+```
+
+Al arrancar la API con `POSTGRES_CONNECTION_STRING`, se ejecuta automaticamente la migracion equivalente a:
+
+```text
+migrations/001_init.sql
+```
+
 ## Configurar Neo4j Aura
 
 Define estas variables de entorno antes de levantar la API:
@@ -198,15 +231,14 @@ Implementado:
 - Semantic graph store en memoria.
 - Semantic graph store real para Neo4j Aura usando `Neo4j.Driver`.
 - Inicializacion automatica de constraints/indices de Neo4j.
-- Evidence store en memoria.
+- Vector/evidence/event stores reales para PostgreSQL/pgvector cuando `POSTGRES_CONNECTION_STRING` esta configurado.
+- Evidence store en memoria como fallback.
 - Tests de flujo y composicion.
 - Docker Compose para servicios externos.
 - Migracion SQL inicial de referencia.
 
 Pendiente para persistencia real:
 
-- Implementar `IVectorMemoryStore` con PostgreSQL + pgvector.
-- Implementar `IEvidenceStore` y `IMemoryEventStore` con PostgreSQL.
 - Agregar migraciones EF Core o pipeline SQL formal.
 - Agregar proveedor real de embeddings/LLM.
 

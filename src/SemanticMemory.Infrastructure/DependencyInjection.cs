@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Neo4j.Driver;
+using Npgsql;
 using SemanticMemory.Application.Abstractions;
 
 namespace SemanticMemory.Infrastructure;
@@ -13,7 +14,24 @@ public static class DependencyInjection
         services.AddSingleton<IEntityExtractor, FakeEntityExtractor>();
         services.AddSingleton<IRelationExtractor, FakeRelationExtractor>();
         services.AddSingleton<IEntityNormalizer, SimpleEntityNormalizer>();
-        services.AddSingleton<IVectorMemoryStore, InMemoryVectorMemoryStore>();
+
+        var postgresOptions = PostgresOptions.FromEnvironment();
+
+        if (postgresOptions.IsConfigured)
+        {
+            services.AddSingleton(postgresOptions);
+            services.AddSingleton(_ => NpgsqlDataSource.Create(postgresOptions.ConnectionString));
+            services.AddSingleton<IVectorMemoryStore, PostgresVectorMemoryStore>();
+            services.AddSingleton<IEvidenceStore, PostgresEvidenceStore>();
+            services.AddSingleton<IMemoryEventStore, PostgresMemoryEventStore>();
+            services.AddSingleton<PostgresSchemaInitializer>();
+        }
+        else
+        {
+            services.AddSingleton<IVectorMemoryStore, InMemoryVectorMemoryStore>();
+            services.AddSingleton<IEvidenceStore, InMemoryEvidenceStore>();
+            services.AddSingleton<IMemoryEventStore, InMemoryMemoryEventStore>();
+        }
 
         var neo4jOptions = LoadNeo4jOptions();
 
@@ -30,9 +48,6 @@ public static class DependencyInjection
         {
             services.AddSingleton<ISemanticGraphStore, InMemorySemanticGraphStore>();
         }
-
-        services.AddSingleton<IEvidenceStore, InMemoryEvidenceStore>();
-        services.AddSingleton<IMemoryEventStore, InMemoryMemoryEventStore>();
 
         return services;
     }

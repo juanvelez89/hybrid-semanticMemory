@@ -19,6 +19,13 @@ builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
+var postgresSchemaInitializer = app.Services.GetService<PostgresSchemaInitializer>();
+
+if (postgresSchemaInitializer is not null)
+{
+    await postgresSchemaInitializer.InitializeAsync(app.Lifetime.ApplicationStopping);
+}
+
 var neo4jSchemaInitializer = app.Services.GetService<Neo4jSchemaInitializer>();
 
 if (neo4jSchemaInitializer is not null)
