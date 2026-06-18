@@ -33,11 +33,26 @@ if (neo4jSchemaInitializer is not null)
     await neo4jSchemaInitializer.InitializeAsync(app.Lifetime.ApplicationStopping);
 }
 
-if (app.Environment.IsDevelopment())
+var swaggerEnabled = app.Environment.IsDevelopment() ||
+    IsEnabled(builder.Configuration["ENABLE_SWAGGER"]) ||
+    IsEnabled(builder.Configuration["SWAGGER_ENABLED"]);
+
+if (swaggerEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapGet("/", () => Results.Ok(new
+    {
+        name = "Hybrid Semantic Memory",
+        status = "ok",
+        health = "/health",
+        swagger = swaggerEnabled ? "/swagger" : null,
+        openApi = swaggerEnabled ? "/swagger/v1/swagger.json" : null
+    }))
+    .WithName("Root")
+    .WithOpenApi();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("Health")
@@ -184,6 +199,13 @@ memory.MapDelete("/{memoryChunkId:guid}", async (
     })
     .WithName("ForgetMemory")
     .WithOpenApi();
+
+static bool IsEnabled(string? value)
+{
+    return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "1", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
+}
 
 app.Run();
 
