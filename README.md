@@ -157,6 +157,26 @@ chmod +x scripts/verify-neo4j.sh
 scripts/verify-neo4j.sh
 ```
 
+## Integracion con OpenClaw
+
+Para que OpenClaw pueda invocar la memoria como herramientas reales, importa este contrato OpenAPI:
+
+```text
+https://semantic-memory.hipatia.tech/swagger/v1/swagger.json
+```
+
+El prompt de OpenClaw debe usar estos nombres de herramienta, que ahora quedan publicados como `operationId` estables en Swagger:
+
+```text
+semantic_memory_ingest
+semantic_memory_retrieve
+semantic_memory_facts
+semantic_memory_explain
+semantic_memory_forget
+```
+
+Si OpenClaw responde que `semantic_memory_ingest` no existe, significa que el Swagger no fue importado como herramienta, que el deploy todavia sirve una version anterior del contrato, o que Swagger no esta habilitado con `ENABLE_SWAGGER=true`.
+
 ## Endpoints principales
 
 ### Ingesta

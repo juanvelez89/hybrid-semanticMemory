@@ -51,11 +51,11 @@ app.MapGet("/", () => Results.Ok(new
         swagger = swaggerEnabled ? "/swagger" : null,
         openApi = swaggerEnabled ? "/swagger/v1/swagger.json" : null
     }))
-    .WithName("Root")
+    .WithName("semantic_memory_root")
     .WithOpenApi();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
-    .WithName("Health")
+    .WithName("semantic_memory_health")
     .WithOpenApi();
 
 var memory = app.MapGroup("/api/memory")
@@ -83,8 +83,14 @@ memory.MapPost("/ingest", async (
             result.UpsertedEdges.Count,
             result.EvidenceCount));
     })
-    .WithName("IngestMemory")
-    .WithOpenApi();
+    .WithName("semantic_memory_ingest")
+    .WithOpenApi(operation =>
+    {
+        operation.OperationId = "semantic_memory_ingest";
+        operation.Summary = "Store conversation text in semantic memory.";
+        operation.Description = "Persists a memory chunk, extracts semantic entities and relations, and stores evidence for later retrieval.";
+        return operation;
+    });
 
 memory.MapPost("/retrieve", async (
         RetrieveRequest request,
@@ -133,8 +139,14 @@ memory.MapPost("/retrieve", async (
 
         return Results.Ok(new RetrieveResponse(context.ContextText, facts, evidence));
     })
-    .WithName("RetrieveMemory")
-    .WithOpenApi();
+    .WithName("semantic_memory_retrieve")
+    .WithOpenApi(operation =>
+    {
+        operation.OperationId = "semantic_memory_retrieve";
+        operation.Summary = "Retrieve semantic memory context.";
+        operation.Description = "Returns compact memory context, relevant semantic facts, and supporting evidence for a user prompt.";
+        return operation;
+    });
 
 memory.MapPost("/facts", async (
         RememberFactRequest request,
@@ -156,8 +168,14 @@ memory.MapPost("/facts", async (
 
         return Results.Ok(new RememberFactResponse(edge.Id, edge.Status, edge.Confidence));
     })
-    .WithName("RememberFact")
-    .WithOpenApi();
+    .WithName("semantic_memory_facts")
+    .WithOpenApi(operation =>
+    {
+        operation.OperationId = "semantic_memory_facts";
+        operation.Summary = "Store a manual semantic fact.";
+        operation.Description = "Creates a direct semantic fact with confidence, evidence, and optional validity dates.";
+        return operation;
+    });
 
 memory.MapGet("/explain/{edgeId:guid}", async (
         Guid edgeId,
@@ -181,8 +199,14 @@ memory.MapGet("/explain/{edgeId:guid}", async (
                     item.Confidence,
                     item.CreatedAt)).ToArray()));
     })
-    .WithName("ExplainMemory")
-    .WithOpenApi();
+    .WithName("semantic_memory_explain")
+    .WithOpenApi(operation =>
+    {
+        operation.OperationId = "semantic_memory_explain";
+        operation.Summary = "Explain why a semantic fact is remembered.";
+        operation.Description = "Returns the evidence attached to a remembered semantic edge.";
+        return operation;
+    });
 
 memory.MapDelete("/{memoryChunkId:guid}", async (
         Guid memoryChunkId,
@@ -197,8 +221,14 @@ memory.MapDelete("/{memoryChunkId:guid}", async (
 
         return Results.NoContent();
     })
-    .WithName("ForgetMemory")
-    .WithOpenApi();
+    .WithName("semantic_memory_forget")
+    .WithOpenApi(operation =>
+    {
+        operation.OperationId = "semantic_memory_forget";
+        operation.Summary = "Forget a memory chunk.";
+        operation.Description = "Performs logical deletion of a memory chunk and its related facts for the tenant and user.";
+        return operation;
+    });
 
 static bool IsEnabled(string? value)
 {
