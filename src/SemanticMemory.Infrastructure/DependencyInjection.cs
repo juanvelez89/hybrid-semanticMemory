@@ -56,7 +56,7 @@ public static class DependencyInjection
     {
         return new Neo4jOptions
         {
-            Uri = Environment.GetEnvironmentVariable("NEO4J_URI") ?? string.Empty,
+            Uri = Neo4jOptions.NormalizeUri(Environment.GetEnvironmentVariable("NEO4J_URI") ?? string.Empty),
             Username = Environment.GetEnvironmentVariable("NEO4J_USERNAME")
                 ?? Environment.GetEnvironmentVariable("NEO4J_USER")
                 ?? string.Empty,

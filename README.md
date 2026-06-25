@@ -136,6 +136,8 @@ export NEO4J_PASSWORD="your-password"
 export NEO4J_DATABASE="your-database"
 ```
 
+Para Neo4j Aura usa siempre el esquema `neo4j+s://`. Si en Coolify queda como `neo4j://...databases.neo4j.io`, el driver intentara conectar sin el modo TLS/routing correcto y el contenedor puede fallar durante el arranque. La API normaliza automaticamente hosts de Aura a `neo4j+s://`, pero conviene dejar la variable correcta en el deploy.
+
 Luego ejecuta:
 
 ```bash
