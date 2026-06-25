@@ -30,7 +30,16 @@ var neo4jSchemaInitializer = app.Services.GetService<Neo4jSchemaInitializer>();
 
 if (neo4jSchemaInitializer is not null)
 {
-    await neo4jSchemaInitializer.InitializeAsync(app.Lifetime.ApplicationStopping);
+    try
+    {
+        await neo4jSchemaInitializer.InitializeAsync(app.Lifetime.ApplicationStopping);
+    }
+    catch (Exception exception) when (!IsEnabled(builder.Configuration["NEO4J_STRICT_STARTUP"]))
+    {
+        app.Logger.LogWarning(
+            exception,
+            "Neo4j schema initialization failed. The API will continue running, but graph operations may fail until Neo4j connectivity is restored.");
+    }
 }
 
 var swaggerEnabled = app.Environment.IsDevelopment() ||

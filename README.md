@@ -138,6 +138,12 @@ export NEO4J_DATABASE="your-database"
 
 Para Neo4j Aura usa siempre el esquema `neo4j+s://`. Si en Coolify queda como `neo4j://...databases.neo4j.io`, el driver intentara conectar sin el modo TLS/routing correcto y el contenedor puede fallar durante el arranque. La API normaliza automaticamente hosts de Aura a `neo4j+s://`, pero conviene dejar la variable correcta en el deploy.
 
+Por defecto, una falla inicial de Neo4j no tumba el contenedor: la API arranca y registra un warning para que Swagger/Postgres sigan disponibles mientras corriges la conectividad. Si quieres que el deploy falle cuando Neo4j no conecte, define:
+
+```bash
+export NEO4J_STRICT_STARTUP=true
+```
+
 Luego ejecuta:
 
 ```bash
